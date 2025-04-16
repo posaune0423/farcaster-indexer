@@ -1,41 +1,28 @@
-import { createBullBoard } from '@bull-board/api'
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
-import { ExpressAdapter } from '@bull-board/express'
-import { extractEventTimestamp } from '@farcaster/hub-nodejs'
-import express from 'express'
+import { extractEventTimestamp } from "@farcaster/hub-nodejs";
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { Context, Hono } from "jsr:@hono/hono";
 
-import { getLatestEvent } from '../api/event.js'
-import { backfillQueue } from './backfill.js'
-import { log } from './logger.js'
-import { streamQueue } from './subscriber.js'
+import { getLatestEvent } from "../api/event.ts";
+import { backfillQueue } from "./backfill.ts";
+import { log } from "./logger.ts";
 
-export function initExpressApp() {
-  const app = express()
-  const serverAdapter = new ExpressAdapter()
+export function initHonoApp() {
+  const app = new Hono();
 
-  app.listen(3001, () => {
-    log.info('Server started on http://localhost:3001')
-  })
-
-  serverAdapter.setBasePath('/')
-  app.use('/', serverAdapter.getRouter())
-
-  app.get('/stats', async (req, res) => {
-    let latestEventTimestamp
-    const latestEventId = await getLatestEvent()
-    const isBackfillActive = (await backfillQueue.getActiveCount()) > 0
+  // /stats endpoint
+  app.get("/stats", async (c: Context) => {
+    let latestEventTimestamp;
+    const latestEventId = await getLatestEvent();
+    const isBackfillActive = (await backfillQueue.getActiveCount()) > 0;
 
     if (latestEventId) {
-      latestEventTimestamp = extractEventTimestamp(latestEventId)
+      latestEventTimestamp = extractEventTimestamp(latestEventId);
     }
 
-    return res
-      .status(200)
-      .json({ latestEventId, latestEventTimestamp, isBackfillActive })
-  })
+    return c.json({ latestEventId, latestEventTimestamp, isBackfillActive });
+  });
 
-  createBullBoard({
-    queues: [new BullMQAdapter(backfillQueue), new BullMQAdapter(streamQueue)],
-    serverAdapter,
-  })
+  // Deno.serve で起動
+  serve(app.fetch, { port: 3001 });
+  log.info("Server started on http://localhost:3001");
 }

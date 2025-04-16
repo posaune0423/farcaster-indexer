@@ -1,61 +1,54 @@
-import { Message } from '@farcaster/hub-nodejs'
+import { Message } from "@farcaster/hub-nodejs";
+import { and, eq } from "drizzle-orm";
 
-import { db } from '../db/kysely.js'
-import { log } from '../lib/logger.js'
+import { casts, db } from "../db/index.ts";
+import { log } from "../lib/logger.ts";
 import {
   breakIntoChunks,
   farcasterTimeToDate,
   formatCasts,
-} from '../lib/utils.js'
+} from "../lib/utils.ts";
 
 /**
  * Insert casts in the database
  * @param msgs Raw hub messages
  */
 export async function insertCasts(msgs: Message[]) {
-  const casts = formatCasts(msgs)
-  if (casts.length === 0) return
-  const chunks = breakIntoChunks(casts, 1000)
+  const castRows = formatCasts(msgs);
+  if (castRows.length === 0) return;
+  const chunks = breakIntoChunks(castRows, 1000);
 
   for (const chunk of chunks) {
     try {
-      await db
-        .insertInto('casts')
-        .values(chunk)
-        .onConflict((oc) => oc.column('hash').doNothing())
-        .execute()
-
-      log.debug(`CASTS INSERTED`)
+      await db.insert(casts).values(chunk);
+      log.debug(`CASTS INSERTED`);
     } catch (error) {
-      log.error(error, 'ERROR INSERTING CAST')
-      throw error
+      log.error(error, "ERROR INSERTING CAST");
+      throw error;
     }
   }
 }
+
 /**
  * Soft delete casts in the database
  * @param msgs Raw hub messages
  */
 export async function deleteCasts(msgs: Message[]) {
   try {
-    await db.transaction().execute(async (trx) => {
+    await db.transaction(async (tx) => {
       for (const msg of msgs) {
-        const data = msg.data!
-
-        await trx
-          .updateTable('casts')
-          .set({
-            deletedAt: farcasterTimeToDate(data.timestamp),
-          })
-          .where('hash', '=', data.castRemoveBody?.targetHash!)
-          .execute()
+        const data = msg.data!;
+        await tx
+          .update(casts)
+          .set({ deletedAt: farcasterTimeToDate(data.timestamp) })
+          .where(eq(casts.hash, data.castRemoveBody?.targetHash!))
+          .execute();
       }
-    })
-
-    log.debug(`CASTS DELETED`)
+    });
+    log.debug(`CASTS DELETED`);
   } catch (error) {
-    log.error(error, 'ERROR DELETING CAST')
-    throw error
+    log.error(error, "ERROR DELETING CAST");
+    throw error;
   }
 }
 
@@ -65,24 +58,24 @@ export async function deleteCasts(msgs: Message[]) {
  */
 export async function pruneCasts(msgs: Message[]) {
   try {
-    await db.transaction().execute(async (trx) => {
+    await db.transaction(async (tx) => {
       for (const msg of msgs) {
-        const data = msg.data!
-
-        await trx
-          .updateTable('casts')
-          .set({
-            prunedAt: farcasterTimeToDate(data.timestamp),
-          })
-          .where('fid', '=', data.fid)
-          .where('text', '=', data.castAddBody!.text)
-          .execute()
+        const data = msg.data!;
+        await tx
+          .update(casts)
+          .set({ prunedAt: farcasterTimeToDate(data.timestamp) })
+          .where(
+            and(
+              eq(casts.fid, data.fid),
+              eq(casts.text, data.castAddBody!.text),
+            ),
+          )
+          .execute();
       }
-    })
-
-    log.debug(`CASTS PRUNED`)
+    });
+    log.debug(`CASTS PRUNED`);
   } catch (error) {
-    log.error(error, 'ERROR PRUNING CAST')
-    throw error
+    log.error(error, "ERROR PRUNING CAST");
+    throw error;
   }
 }

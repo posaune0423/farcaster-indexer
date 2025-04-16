@@ -6,81 +6,82 @@ import {
   Message,
   OnChainEvent,
   OnChainEventType,
-} from '@farcaster/hub-nodejs'
+} from "@farcaster/hub-nodejs";
 
-import { hubClient } from './hub-client.js'
-import { MAX_PAGE_SIZE, checkMessages } from './utils.js'
+import { setTimeout } from "node:timers/promises";
+import { hubClient } from "./hub_client.ts";
+import { checkMessages, MAX_PAGE_SIZE } from "./utils.ts";
 
 export async function getAllCastsByFid(fid: FidRequest) {
-  const casts: Message[] = new Array()
-  let nextPageToken: Uint8Array | undefined
+  const casts: Message[] = [];
+  let nextPageToken: Uint8Array | undefined;
 
   while (true) {
     const res = await hubClient.getCastsByFid({
       ...fid,
       pageSize: MAX_PAGE_SIZE,
       pageToken: nextPageToken,
-    })
+    });
 
-    const messages = checkMessages(res, fid.fid)
-    casts.push(...messages)
+    const messages = checkMessages(res, fid.fid);
+    casts.push(...messages);
 
     if (messages.length < MAX_PAGE_SIZE) {
-      break
+      break;
     }
 
-    nextPageToken = res._unsafeUnwrap().nextPageToken
+    nextPageToken = res._unsafeUnwrap().nextPageToken;
   }
 
-  return casts
+  return casts;
 }
 
 export async function getAllReactionsByFid(fid: FidRequest) {
-  const reactions: Message[] = new Array()
-  let nextPageToken: Uint8Array | undefined
+  const reactions: Message[] = [];
+  let nextPageToken: Uint8Array | undefined;
 
   while (true) {
     const res = await hubClient.getReactionsByFid({
       ...fid,
       pageSize: MAX_PAGE_SIZE,
       pageToken: nextPageToken,
-    })
+    });
 
-    const messages = checkMessages(res, fid.fid)
-    reactions.push(...messages)
+    const messages = checkMessages(res, fid.fid);
+    reactions.push(...messages);
 
     if (messages.length < MAX_PAGE_SIZE) {
-      break
+      break;
     }
 
-    nextPageToken = res._unsafeUnwrap().nextPageToken
+    nextPageToken = res._unsafeUnwrap().nextPageToken;
   }
 
-  return reactions
+  return reactions;
 }
 
 export async function getAllLinksByFid(fid: FidRequest) {
-  const links: Message[] = new Array()
-  let nextPageToken: Uint8Array | undefined
+  const links: Message[] = [];
+  let nextPageToken: Uint8Array | undefined;
 
   while (true) {
     const res = await hubClient.getLinksByFid({
       ...fid,
       pageSize: MAX_PAGE_SIZE,
       pageToken: nextPageToken,
-    })
+    });
 
-    const messages = checkMessages(res, fid.fid)
-    links.push(...messages)
+    const messages = checkMessages(res, fid.fid);
+    links.push(...messages);
 
     if (messages.length < MAX_PAGE_SIZE) {
-      break
+      break;
     }
 
-    nextPageToken = res._unsafeUnwrap().nextPageToken
+    nextPageToken = res._unsafeUnwrap().nextPageToken;
   }
 
-  return links
+  return links;
 }
 
 // TODO: refactor this to be more consistent with the other functions
@@ -92,30 +93,30 @@ export async function* getOnChainEventsByFidInBatchesOf(
     pageSize,
     eventTypes,
   }: {
-    fid: number
-    pageSize: number
-    eventTypes: OnChainEventType[]
-  }
+    fid: number;
+    pageSize: number;
+    eventTypes: OnChainEventType[];
+  },
 ) {
   for (const eventType of eventTypes) {
     let result = await retryHubCallWithExponentialBackoff(() =>
       hub.getOnChainEvents({ pageSize, fid, eventType })
-    )
+    );
     for (;;) {
       if (result.isErr()) {
         throw new Error(
           `Unable to backfill events for FID ${fid} of type ${eventType}`,
-          { cause: result.error }
-        )
+          { cause: result.error },
+        );
       }
 
-      const { events, nextPageToken: pageToken } = result.value
-      yield events as OnChainEvent[]
+      const { events, nextPageToken: pageToken } = result.value;
+      yield events as OnChainEvent[];
 
-      if (!pageToken?.length) break
+      if (!pageToken?.length) break;
       result = await retryHubCallWithExponentialBackoff(() =>
         hub.getOnChainEvents({ pageSize, pageToken, fid, eventType })
-      )
+      );
     }
   }
 }
@@ -124,30 +125,32 @@ async function retryHubCallWithExponentialBackoff<T>(
   fn: () => Promise<HubResult<T>>,
   attempt = 1,
   maxAttempts = 10,
-  baseDelayMs = 100
+  baseDelayMs = 100,
 ): Promise<HubResult<T>> {
-  let currentAttempt = attempt
+  let currentAttempt = attempt;
   try {
-    const result = await fn()
+    const result = await fn();
     if (result.isErr()) {
-      throw new Error(`maybe retryable error : ${JSON.stringify(result.error)}`)
+      throw new Error(
+        `maybe retryable error : ${JSON.stringify(result.error)}`,
+      );
     }
-    return result
+    return result;
   } catch (error) {
     if (currentAttempt >= maxAttempts) {
-      throw error
+      throw error;
     }
 
-    const delayMs = baseDelayMs * 2 ** currentAttempt
+    const delayMs = baseDelayMs * 2 ** currentAttempt;
 
-    await new Promise((resolve) => setTimeout(resolve, delayMs))
+    await setTimeout(delayMs);
 
-    currentAttempt++
+    currentAttempt++;
     return retryHubCallWithExponentialBackoff(
       fn,
       currentAttempt,
       maxAttempts,
-      delayMs
-    )
+      delayMs,
+    );
   }
 }

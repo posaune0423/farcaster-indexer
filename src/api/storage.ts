@@ -1,23 +1,25 @@
 import {
+  isStorageRentOnChainEvent,
   OnChainEvent,
   OnChainEventType,
-  isStorageRentOnChainEvent,
-} from '@farcaster/hub-nodejs'
+} from "@farcaster/hub-nodejs";
 
-import { db } from '../db/kysely.js'
-import { hubClient } from '../lib/hub-client.js'
-import { getOnChainEventsByFidInBatchesOf } from '../lib/paginate.js'
-import { MAX_PAGE_SIZE, farcasterTimeToDate } from '../lib/utils.js'
-
+import { sql } from "drizzle-orm";
+import { db, storage as storageTable } from "../db/index.ts";
+import { hubClient } from "../lib/hub_client.ts";
+import { getOnChainEventsByFidInBatchesOf } from "../lib/paginate.ts";
+import { farcasterTimeToDate, MAX_PAGE_SIZE } from "../lib/utils.ts";
 export async function getAllStorageByFid(fid: number) {
-  let storageEvents: OnChainEvent[] = []
+  let storageEvents: OnChainEvent[] = [];
 
-  for await (const events of getOnChainEventsByFidInBatchesOf(hubClient, {
-    fid,
-    pageSize: MAX_PAGE_SIZE,
-    eventTypes: [OnChainEventType.EVENT_TYPE_STORAGE_RENT],
-  })) {
-    storageEvents = storageEvents.concat(...events)
+  for await (
+    const events of getOnChainEventsByFidInBatchesOf(hubClient, {
+      fid,
+      pageSize: MAX_PAGE_SIZE,
+      eventTypes: [OnChainEventType.EVENT_TYPE_STORAGE_RENT],
+    })
+  ) {
+    storageEvents = storageEvents.concat(...events);
   }
 
   // Since there could be many events, ensure we process them in sorted order
@@ -25,21 +27,22 @@ export async function getAllStorageByFid(fid: number) {
     a.blockNumber === b.blockNumber
       ? a.logIndex - b.logIndex
       : a.blockNumber - b.blockNumber
-  )
+  );
 
-  return sortedEventsForFid
+  return sortedEventsForFid;
 }
 
 export async function insertStorage(storageEvents: OnChainEvent[]) {
   for (const storage of storageEvents) {
-    if (!isStorageRentOnChainEvent(storage))
-      throw new Error(`Invalid SignerOnChainEvent: ${storage}`)
+    if (!isStorageRentOnChainEvent(storage)) {
+      throw new Error(`Invalid SignerOnChainEvent: ${storage}`);
+    }
 
-    const body = storage.storageRentEventBody
-    const timestamp = new Date(storage.blockTimestamp * 1000)
+    const body = storage.storageRentEventBody;
+    const timestamp = new Date(storage.blockTimestamp * 1000);
 
     await db
-      .insertInto('storage')
+      .insert(storageTable)
       .values({
         fid: storage.fid,
         units: body.units,
@@ -47,15 +50,15 @@ export async function insertStorage(storageEvents: OnChainEvent[]) {
         rentedAt: timestamp,
         expiresAt: farcasterTimeToDate(body.expiry),
       })
-      .onConflict((oc) =>
-        oc.columns(['fid', 'expiresAt']).doUpdateSet(({ ref }) => ({
-          units: ref('excluded.units'),
-          payer: ref('excluded.payer'),
-          expiresAt: ref('excluded.expiresAt'),
-          rentedAt: ref('excluded.rentedAt'),
+      .onConflictDoUpdate({
+        target: [storageTable.fid, storageTable.expiresAt],
+        set: {
+          units: sql`excluded.units`,
+          payer: sql`excluded.payer`,
+          expiresAt: sql`excluded.expiresAt`,
+          rentedAt: sql`excluded.rentedAt`,
           updatedAt: new Date(),
-        }))
-      )
-      .execute()
+        },
+      });
   }
 }

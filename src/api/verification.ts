@@ -1,28 +1,32 @@
-import { Message } from '@farcaster/hub-nodejs'
+import { Message } from "@farcaster/hub-nodejs";
 
-import { db } from '../db/kysely.js'
-import { log } from '../lib/logger.js'
-import { farcasterTimeToDate, formatVerifications } from '../lib/utils.js'
-
+import { and, eq, sql } from "drizzle-orm";
+import { db, verifications as verificationsTable } from "../db/index.ts";
+import { log } from "../lib/logger.ts";
+import { farcasterTimeToDate, formatVerifications } from "../lib/utils.ts";
 /**
  * Insert a new verification in the database
  * @param msg Hub event in JSON format
  */
 export async function insertVerifications(msgs: Message[]) {
-  const verifications = formatVerifications(msgs)
-  if (verifications.length === 0) return
+  const verifications = formatVerifications(msgs);
+  if (verifications.length === 0) return;
 
   try {
     await db
-      .insertInto('verifications')
+      .insert(verificationsTable)
       .values(verifications)
-      .onConflict((oc) => oc.columns(['fid', 'signerAddress']).doNothing())
-      .execute()
+      .onConflictDoUpdate({
+        target: [verificationsTable.fid, verificationsTable.signerAddress],
+        set: {
+          deletedAt: sql`excluded.deletedAt`,
+        },
+      });
 
-    log.debug(`VERIFICATIONS INSERTED`)
+    log.debug(`VERIFICATIONS INSERTED`);
   } catch (error) {
-    log.error(error, 'ERROR INSERTING VERIFICATIONS')
-    throw error
+    log.error(error, "ERROR INSERTING VERIFICATIONS");
+    throw error;
   }
 }
 
@@ -32,23 +36,27 @@ export async function insertVerifications(msgs: Message[]) {
  */
 export async function deleteVerifications(msgs: Message[]) {
   try {
-    await db.transaction().execute(async (trx) => {
+    await db.transaction(async (trx) => {
       for (const msg of msgs) {
-        const data = msg.data!
-        const address = data.verificationRemoveBody!.address
+        const data = msg.data!;
+        const address = data.verificationRemoveBody!.address;
 
         await trx
-          .updateTable('verifications')
+          .update(verificationsTable)
           .set({ deletedAt: farcasterTimeToDate(data.timestamp) })
-          .where('signerAddress', '=', address)
-          .where('fid', '=', data.fid)
-          .execute()
+          .where(
+            and(
+              eq(verificationsTable.signerAddress, address),
+              eq(verificationsTable.fid, data.fid),
+            ),
+          )
+          .execute();
       }
-    })
+    });
 
-    log.debug('VERIFICATIONS DELETED')
+    log.debug("VERIFICATIONS DELETED");
   } catch (error) {
-    log.error(error, 'ERROR DELETING VERIFICATIONS')
-    throw error
+    log.error(error, "ERROR DELETING VERIFICATIONS");
+    throw error;
   }
 }

@@ -1,42 +1,43 @@
 import {
   ContactInfoContentBody,
   FidRequest,
+  fromFarcasterTime,
   HubResult,
   Message,
   MessagesResponse,
   OnChainEventResponse,
-  fromFarcasterTime,
-} from '@farcaster/hub-nodejs'
-import { Insertable } from 'kysely'
+} from "@farcaster/hub-nodejs";
+import { Insertable } from "kysely";
 
-import { getAllRegistrationsByFid } from '../api/fid.js'
-import { getAllSignersByFid } from '../api/signer.js'
-import { getAllStorageByFid } from '../api/storage.js'
-import { Tables } from '../db/db.types.js'
-import { hubClient } from './hub-client.js'
-import { log } from './logger.js'
+import { Buffer } from "node:buffer";
+import { getAllRegistrationsByFid } from "../api/fid.ts";
+import { getAllSignersByFid } from "../api/signer.ts";
+import { getAllStorageByFid } from "../api/storage.ts";
+import { Tables } from "../db/db.types.ts";
+import { hubClient } from "./hub_client.ts";
+import { log } from "./logger.ts";
 import {
   getAllCastsByFid,
   getAllLinksByFid,
   getAllReactionsByFid,
-} from './paginate.js'
+} from "./paginate.ts";
 
-export const MAX_PAGE_SIZE = 10_000
+export const MAX_PAGE_SIZE = 10_000;
 
 export const NULL_ETH_ADDRESS = Uint8Array.from(
-  Buffer.from('0000000000000000000000000000000000000000', 'hex')
-)
+  Buffer.from("0000000000000000000000000000000000000000", "hex"),
+);
 
 export function farcasterTimeToDate(time: number): Date {
-  const result = fromFarcasterTime(time)
-  if (result.isErr()) throw result.error
-  return new Date(result.value)
+  const result = fromFarcasterTime(time);
+  if (result.isErr()) throw result.error;
+  return new Date(result.value);
 }
 
 export function formatCasts(msgs: Message[]) {
   return msgs.map((msg) => {
-    const data = msg.data!
-    const castAddBody = data.castAddBody!
+    const data = msg.data!;
+    const castAddBody = data.castAddBody!;
 
     return {
       timestamp: farcasterTimeToDate(data.timestamp),
@@ -49,14 +50,14 @@ export function formatCasts(msgs: Message[]) {
       embeds: JSON.stringify(castAddBody.embeds),
       mentions: JSON.stringify(castAddBody.mentions),
       mentionsPositions: JSON.stringify(castAddBody.mentionsPositions),
-    } satisfies Insertable<Tables['casts']>
-  })
+    } satisfies Insertable<Tables["casts"]>;
+  });
 }
 
 export function formatReactions(msgs: Message[]) {
   return msgs.map((msg) => {
-    const data = msg.data!
-    const reaction = data.reactionBody!
+    const data = msg.data!;
+    const reaction = data.reactionBody!;
 
     return {
       timestamp: farcasterTimeToDate(data.timestamp),
@@ -66,24 +67,24 @@ export function formatReactions(msgs: Message[]) {
       hash: msg.hash,
       targetCastHash: reaction.targetCastId?.hash,
       targetUrl: reaction.targetUrl,
-    } satisfies Insertable<Tables['reactions']>
-  })
+    } satisfies Insertable<Tables["reactions"]>;
+  });
 }
 
 export function formatUserDatas(msgs: Message[]) {
   // Users can submit multiple messages with the same `userDataAddBody.type` within the batch period
   // We reconcile this by using the value of the last message with the same type from that fid
-  const userDataMap = new Map<string, Message>()
+  const userDataMap = new Map<string, Message>();
 
   for (const msg of msgs) {
-    const data = msg.data!
-    const userDataAddBody = data.userDataBody!
-    userDataMap.set(`fid:${data.fid}-type:${userDataAddBody.type}`, msg)
+    const data = msg.data!;
+    const userDataAddBody = data.userDataBody!;
+    userDataMap.set(`fid:${data.fid}-type:${userDataAddBody.type}`, msg);
   }
 
   return Array.from(userDataMap.values()).map((msg) => {
-    const data = msg.data!
-    const userDataAddBody = data.userDataBody!
+    const data = msg.data!;
+    const userDataAddBody = data.userDataBody!;
 
     return {
       timestamp: farcasterTimeToDate(data.timestamp),
@@ -91,14 +92,14 @@ export function formatUserDatas(msgs: Message[]) {
       type: userDataAddBody.type,
       hash: msg.hash,
       value: userDataAddBody.value,
-    } satisfies Insertable<Tables['userData']>
-  })
+    } satisfies Insertable<Tables["userData"]>;
+  });
 }
 
 export function formatVerifications(msgs: Message[]) {
   return msgs.map((msg) => {
-    const data = msg.data!
-    const addAddressBody = data.verificationAddAddressBody!
+    const data = msg.data!;
+    const addAddressBody = data.verificationAddAddressBody!;
 
     return {
       timestamp: farcasterTimeToDate(data.timestamp),
@@ -107,14 +108,14 @@ export function formatVerifications(msgs: Message[]) {
       signerAddress: addAddressBody.address,
       blockHash: addAddressBody.blockHash,
       signature: addAddressBody.claimSignature,
-    } satisfies Insertable<Tables['verifications']>
-  })
+    } satisfies Insertable<Tables["verifications"]>;
+  });
 }
 
 export function formatLinks(msgs: Message[]) {
   return msgs.map((msg) => {
-    const data = msg.data!
-    const link = data.linkBody!
+    const data = msg.data!;
+    const link = data.linkBody!;
 
     return {
       timestamp: farcasterTimeToDate(data.timestamp),
@@ -125,8 +126,8 @@ export function formatLinks(msgs: Message[]) {
         : null,
       type: link.type,
       hash: msg.hash,
-    } satisfies Insertable<Tables['links']>
-  })
+    } satisfies Insertable<Tables["links"]>;
+  });
 }
 
 export function formatHubs(contacts: ContactInfoContentBody[]) {
@@ -141,39 +142,39 @@ export function formatHubs(contacts: ContactInfoContentBody[]) {
         network: c.network.toString(),
         appVersion: c.appVersion,
         timestamp: c.timestamp,
-      }) satisfies Insertable<Tables['hubs']>
-  )
+      }) satisfies Insertable<Tables["hubs"]>,
+  );
 }
 
 export function breakIntoChunks<T>(array: T[], size: number) {
-  const chunks = []
+  const chunks = [];
   for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size))
+    chunks.push(array.slice(i, i + size));
   }
-  return chunks
+  return chunks;
 }
 
 export function checkMessages(
   messages: HubResult<MessagesResponse>,
-  fid: number
+  fid: number,
 ) {
   if (messages.isErr()) {
     // This happens consistently for the same fids for an unknown reason, but still saves their relevant data
-    log.debug(messages.error, `Error fetching messages for FID ${fid}`)
+    log.debug(messages.error, `Error fetching messages for FID ${fid}`);
   }
 
-  return messages.isOk() ? messages.value.messages : []
+  return messages.isOk() ? messages.value.messages : [];
 }
 
 export function checkOnchainEvent(
   event: HubResult<OnChainEventResponse>,
-  fid: number
+  fid: number,
 ) {
   if (event.isErr()) {
-    log.warn(event.error, `Error fetching onchain event for FID ${fid}`)
+    log.warn(event.error, `Error fetching onchain event for FID ${fid}`);
   }
 
-  return event.isOk() ? event.value : null
+  return event.isOk() ? event.value : null;
 }
 
 /**
@@ -181,10 +182,10 @@ export function checkOnchainEvent(
  * @param fid Farcaster ID
  */
 export async function getFullProfileFromHub(_fid: number) {
-  const fid = FidRequest.create({ fid: _fid })
+  const fid = FidRequest.create({ fid: _fid });
 
-  const userData = await hubClient.getUserDataByFid(fid)
-  const verifications = await hubClient.getVerificationsByFid(fid)
+  const userData = await hubClient.getUserDataByFid(fid);
+  const verifications = await hubClient.getVerificationsByFid(fid);
 
   return {
     casts: await getAllCastsByFid(fid),
@@ -197,5 +198,5 @@ export async function getFullProfileFromHub(_fid: number) {
     registrations: getAllRegistrationsByFid(_fid),
     signers: getAllSignersByFid(_fid),
     storage: getAllStorageByFid(_fid),
-  }
+  };
 }

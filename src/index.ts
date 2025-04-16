@@ -1,30 +1,28 @@
-import 'dotenv/config'
+import { getLatestEvent } from "./api/event.ts";
+import { backfill, backfillQueue, backfillWorker } from "./lib/backfill.ts";
+import { initHonoApp } from "./lib/express.ts";
+import { log } from "./lib/logger.ts";
+import { subscribe } from "./lib/subscriber.ts";
 
-import { getLatestEvent } from './api/event.js'
-import { backfill, backfillQueue, backfillWorker } from './lib/backfill.js'
-import { initExpressApp } from './lib/express.js'
-import { log } from './lib/logger.js'
-import { subscribe } from './lib/subscriber.js'
+initHonoApp();
 
-initExpressApp()
-
-if (process.argv[2] === '--backfill') {
+if (Deno.args[0] === "--backfill") {
   await backfill({
-    maxFid: Number(process.env.BACKFILL_MAX_FID) || undefined,
-  })
+    maxFid: Number(Deno.env.get("BACKFILL_MAX_FID")) || undefined,
+  });
 
   // Once backfill completes, start subscribing to new events
-  let subscriberStarted = false
-  backfillWorker.on('completed', async () => {
-    if (subscriberStarted) return
-    const queueSize = await backfillQueue.getActiveCount()
+  let subscriberStarted = false;
+  backfillWorker.on("completed", async () => {
+    if (subscriberStarted) return;
+    const queueSize = await backfillQueue.getActiveCount();
 
     if (queueSize === 0) {
-      subscriberStarted = true
-      log.info('Finished backfill')
-      subscribe(await getLatestEvent())
+      subscriberStarted = true;
+      log.info("Finished backfill");
+      subscribe(await getLatestEvent());
     }
-  })
+  });
 } else {
-  subscribe(await getLatestEvent())
+  subscribe(await getLatestEvent());
 }

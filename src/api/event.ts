@@ -1,13 +1,13 @@
-import { redis } from '../lib/redis.js'
+import { redis } from "../lib/redis.ts";
 
-const redisKey = 'hub:latest-event-id'
+const redisKey = "hub:latest-event-id";
 
 /**
  * Insert an event ID in the database
  * @param eventId Hub event ID
  */
 export async function saveLatestEventId(eventId: number) {
-  await redis.set(redisKey, eventId)
+  await redis.set(redisKey, eventId);
 }
 
 /**
@@ -15,6 +15,6 @@ export async function saveLatestEventId(eventId: number) {
  * @returns Latest event ID
  */
 export async function getLatestEvent(): Promise<number | undefined> {
-  const res = await redis.get(redisKey)
-  return res ? parseInt(res) : undefined
+  const res = await redis.get(redisKey);
+  return res ? parseInt(res) : undefined;
 }
