@@ -1,10 +1,8 @@
-import { Job, Queue, QueueOptions, Worker } from "bullmq";
-
+import { type Job, Queue, type QueueOptions, Worker } from "bullmq";
 import { redis } from "./redis.ts";
-import process from "node:process";
 
 const bullMqOptions: QueueOptions = {
-  connection: redis,
+  connection: redis.options,
   prefix: "hub",
 };
 

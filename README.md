@@ -23,6 +23,42 @@ postgres, redis) on the same machine. I recommend
 [Latitude](https://www.latitude.sh/r/673C7DB2) (referral code for $200 of free
 credits).
 
+## Prerequisites
+
+- Deno
+- Docker and Docker Compose (for PostgreSQL and Redis)
+
+## Docker Setup
+
+### Start Services
+
+```bash
+# Start PostgreSQL
+docker run -d \
+  --name postgres-farcaster \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=farcaster \
+  -p 5432:5432 \
+  postgres:15
+
+# Start Redis
+docker run -d \
+  --name redis-farcaster \
+  -p 6379:6379 \
+  redis:7
+```
+
+### Cleanup and Restart
+
+```bash
+# Stop and remove containers
+docker stop postgres-farcaster redis-farcaster
+docker rm postgres-farcaster redis-farcaster
+
+# Restart services (use the same commands as above to start)
+```
+
 ## How to run
 
 Clone this repo

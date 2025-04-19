@@ -3,8 +3,8 @@ import {
   getSSLHubRpcClient,
 } from "@farcaster/hub-nodejs";
 
-const HUB_RPC = Deno.env.get("HUB_RPC");
-const HUB_SSL = Deno.env.get("HUB_SSL") || "true";
+const HUB_RPC = process.env.HUB_RPC;
+const HUB_SSL = process.env.HUB_SSL || "true";
 
 if (!HUB_RPC) {
   throw new Error("HUB_RPC env variable is not set");

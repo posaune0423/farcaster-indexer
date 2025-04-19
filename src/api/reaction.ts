@@ -1,5 +1,5 @@
-import { Message } from "@farcaster/hub-nodejs";
-import { and, eq } from "drizzle-orm";
+import type { Message } from "@farcaster/hub-nodejs";
+import { and, eq, sql } from "drizzle-orm";
 import { db, reactions } from "../db/index.ts";
 import { log } from "../lib/logger.ts";
 import {
@@ -19,7 +19,15 @@ export async function insertReactions(msgs: Message[]) {
 
   for (const chunk of chunks) {
     try {
-      await db.insert(reactions).values(chunk);
+      await db
+        .insert(reactions)
+        .values(chunk)
+        .onConflictDoUpdate({
+          target: [reactions.hash],
+          set: {
+            updatedAt: sql`CURRENT_TIMESTAMP`,
+          },
+        });
       log.debug(`REACTIONS INSERTED`);
     } catch (error) {
       log.error(error, "ERROR INSERTING REACTIONS");

@@ -1,14 +1,14 @@
-import { getLatestEvent } from "./api/event.ts";
-import { backfill, backfillQueue, backfillWorker } from "./lib/backfill.ts";
-import { initHonoApp } from "./lib/express.ts";
-import { log } from "./lib/logger.ts";
-import { subscribe } from "./lib/subscriber.ts";
+import { getLatestEvent } from "./api/event";
+import { backfill, backfillQueue, backfillWorker } from "./lib/backfill";
+import { initHonoApp } from "./lib/hono";
+import { log } from "./lib/logger";
+import { subscribe } from "./lib/subscriber";
 
 initHonoApp();
 
-if (Deno.args[0] === "--backfill") {
+if (process.argv[2] === "--backfill") {
   await backfill({
-    maxFid: Number(Deno.env.get("BACKFILL_MAX_FID")) || undefined,
+    maxFid: Number(process.env.BACKFILL_MAX_FID) || undefined,
   });
 
   // Once backfill completes, start subscribing to new events

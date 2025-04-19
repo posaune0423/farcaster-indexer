@@ -1,9 +1,8 @@
-import { Job } from "bullmq";
+import type { Job } from "bullmq";
 
 import { insertCasts } from "../api/cast.ts";
 import { saveLatestEventId } from "../api/event.ts";
 import { insertRegistrations } from "../api/fid.ts";
-import { insertHubs } from "../api/hub.ts";
 import { insertLinks } from "../api/link.ts";
 import { insertReactions } from "../api/reaction.ts";
 import { insertSigners } from "../api/signer.ts";
@@ -51,7 +50,7 @@ export async function backfill({ maxFid }: { maxFid?: number | undefined }) {
   const latestEventId = makeLatestEventId();
   await saveLatestEventId(latestEventId);
   await addFidsToBackfillQueue(maxFid);
-  await getHubs();
+  // await getHubs();
   // await getDbInfo()
 }
 
@@ -73,18 +72,18 @@ async function getAllFids() {
   return Array.from({ length: Number(maxFid) }, (_, i) => i + 1);
 }
 
-/**
- * Get all hubs
- */
-async function getHubs() {
-  const peers = await hubClient.getCurrentPeers({});
+// /**
+//  * Get all hubs
+//  */
+// async function getHubs() {
+//   const peers = await hubClient.getPeers();
 
-  if (peers.isErr()) {
-    throw new Error("Unable to backfill Hubs", { cause: peers.error });
-  }
+//   if (peers.isErr()) {
+//     throw new Error("Unable to backfill Hubs", { cause: peers.error });
+//   }
 
-  insertHubs(peers.value.contacts);
-}
+//   insertHubs(peers.value.contacts);
+// }
 
 // async function getDbInfo() {
 //   const dbInfo = await hubClient.getInfo({

@@ -1,0 +1,44 @@
+{
+  "name": "farcaster-indexer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "dotenvx run -- tsx src/index.ts",
+    "db:generate": "dotenvx run -- drizzle-kit generate",
+    "db:migrate": "dotenvx run -- drizzle-kit migrate",
+    "db:studio": "dotenvx run -- drizzle-kit studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.8.1",
+  "prettier": {
+    "singleQuote": false,
+    "trailingComma": "all",
+    "printWidth": 120,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true
+  },
+  "dependencies": {
+    "@bull-board/api": "^6.9.2",
+    "@bull-board/hono": "^6.9.2",
+    "@farcaster/hub-nodejs": "^0.13.1",
+    "@hono/node-server": "^1.14.1",
+    "bullmq": "^5.49.1",
+    "drizzle-orm": "^0.42.0",
+    "hono": "^4.7.7",
+    "ioredis": "^5.6.1",
+    "pg": "^8.14.1",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "viem": "^2.27.2"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.13",
+    "drizzle-kit": "^0.31.0",
+    "pg-connection-string": "^2.7.0"
+  }
+}

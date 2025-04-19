@@ -1,6 +1,6 @@
 import {
   isSignerOnChainEvent,
-  OnChainEvent,
+  type OnChainEvent,
   OnChainEventType,
   SignerEventType,
 } from "@farcaster/hub-nodejs";

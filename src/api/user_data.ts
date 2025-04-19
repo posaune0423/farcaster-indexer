@@ -1,4 +1,4 @@
-import { Message } from "@farcaster/hub-nodejs";
+import type { Message } from "@farcaster/hub-nodejs";
 import { sql } from "drizzle-orm";
 import { db, userData } from "../db/index.ts";
 import { log } from "../lib/logger.ts";
@@ -16,6 +16,7 @@ export async function insertUserDatas(msgs: Message[]) {
         set: {
           hash: sql`excluded.hash`,
           value: sql`excluded.value`,
+          updatedAt: new Date(),
         },
       });
     log.debug(`USER DATA INSERTED`);

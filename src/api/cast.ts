@@ -1,4 +1,4 @@
-import { Message } from "@farcaster/hub-nodejs";
+import type { Message } from "@farcaster/hub-nodejs";
 import { and, eq } from "drizzle-orm";
 
 import { casts, db } from "../db/index.ts";

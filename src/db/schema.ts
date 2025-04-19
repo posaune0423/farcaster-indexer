@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   uuid,
+  unique,
 } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Uint8Array }>({
@@ -38,6 +39,7 @@ export const casts = pgTable("casts", {
 });
 
 export type Cast = typeof casts.$inferSelect;
+export type CastInsert = typeof casts.$inferInsert;
 
 export const reactions = pgTable("reactions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -57,6 +59,7 @@ export const reactions = pgTable("reactions", {
 });
 
 export type Reaction = typeof reactions.$inferSelect;
+export type ReactionInsert = typeof reactions.$inferInsert;
 
 export const links = pgTable("links", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -75,6 +78,7 @@ export const links = pgTable("links", {
 });
 
 export type Link = typeof links.$inferSelect;
+export type LinkInsert = typeof links.$inferInsert;
 
 export const verifications = pgTable("verifications", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -92,6 +96,7 @@ export const verifications = pgTable("verifications", {
 });
 
 export type Verification = typeof verifications.$inferSelect;
+export type VerificationInsert = typeof verifications.$inferInsert;
 
 export const userData = pgTable("userData", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -103,11 +108,14 @@ export const userData = pgTable("userData", {
   deletedAt: timestamp("deletedAt", { withTimezone: true }),
   fid: bigint("fid", { mode: "number" }).notNull(),
   type: integer("type").notNull(),
-  hash: bytea("hash").notNull(),
+  hash: bytea("hash").notNull().unique(),
   value: text("value").notNull(),
-});
+}, (table) => ({
+  fidTypeUnique: unique().on(table.fid, table.type),
+}));
 
 export type UserData = typeof userData.$inferSelect;
+export type UserDataInsert = typeof userData.$inferInsert;
 
 export const fids = pgTable("fids", {
   fid: bigint("fid", { mode: "number" }).primaryKey(),
@@ -121,6 +129,7 @@ export const fids = pgTable("fids", {
 });
 
 export type Fid = typeof fids.$inferSelect;
+export type FidInsert = typeof fids.$inferInsert;
 
 export const signers = pgTable("signers", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -139,6 +148,7 @@ export const signers = pgTable("signers", {
 });
 
 export type Signer = typeof signers.$inferSelect;
+export type SignerInsert = typeof signers.$inferInsert;
 
 export const storage = pgTable("storage", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -154,6 +164,7 @@ export const storage = pgTable("storage", {
 });
 
 export type Storage = typeof storage.$inferSelect;
+export type StorageInsert = typeof storage.$inferInsert;
 
 export const hubs = pgTable("hubs", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -172,3 +183,4 @@ export const hubs = pgTable("hubs", {
 });
 
 export type Hub = typeof hubs.$inferSelect;
+export type HubInsert = typeof hubs.$inferInsert;

@@ -1,5 +1,5 @@
 // TODO: Clean up the functions in this file, it's very repetitive
-import {
+import type {
   FidRequest,
   HubResult,
   HubRpcClient,
@@ -8,7 +8,7 @@ import {
   OnChainEventType,
 } from "@farcaster/hub-nodejs";
 
-import { setTimeout } from "node:timers/promises";
+
 import { hubClient } from "./hub_client.ts";
 import { checkMessages, MAX_PAGE_SIZE } from "./utils.ts";
 
@@ -143,7 +143,7 @@ async function retryHubCallWithExponentialBackoff<T>(
 
     const delayMs = baseDelayMs * 2 ** currentAttempt;
 
-    await setTimeout(delayMs);
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
 
     currentAttempt++;
     return retryHubCallWithExponentialBackoff(

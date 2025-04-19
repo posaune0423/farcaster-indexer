@@ -1,6 +1,6 @@
-import { ContactInfoContentBody } from "@farcaster/hub-nodejs";
+import type { ContactInfoContentBody } from "@farcaster/hub-nodejs";
 
-import { db } from "../db/kysely.ts";
+import { db, hubs as hubsTable } from "../db/index.ts";
 import { log } from "../lib/logger.ts";
 import { breakIntoChunks, formatHubs } from "../lib/utils.ts";
 
@@ -16,10 +16,14 @@ export async function insertHubs(contacts: ContactInfoContentBody[]) {
   for (const chunk of chunks) {
     try {
       await db
-        .insertInto("hubs")
+        .insert(hubsTable)
         .values(chunk)
-        .onConflict((oc) => oc.column("id").doNothing())
-        .execute();
+        .onConflictDoUpdate({
+          target: [hubsTable.id],
+          set: {
+            updatedAt: new Date(),
+          },
+        });
 
       log.debug(`HUBS INSERTED`);
     } catch (error) {

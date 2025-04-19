@@ -5,7 +5,7 @@ import {
   MessageType,
   OnChainEventType,
 } from "@farcaster/hub-nodejs";
-import { Job } from "bullmq";
+import type { Job } from "bullmq";
 
 import { Buffer } from "node:buffer";
 import { deleteCasts, insertCasts, pruneCasts } from "../api/cast.ts";

@@ -1,4 +1,4 @@
-import { Message } from "@farcaster/hub-nodejs";
+import type { Message } from "@farcaster/hub-nodejs";
 
 import { and, eq, sql } from "drizzle-orm";
 import { db, verifications as verificationsTable } from "../db/index.ts";
@@ -17,9 +17,10 @@ export async function insertVerifications(msgs: Message[]) {
       .insert(verificationsTable)
       .values(verifications)
       .onConflictDoUpdate({
-        target: [verificationsTable.fid, verificationsTable.signerAddress],
+        target: [verificationsTable.hash],
         set: {
           deletedAt: sql`excluded.deletedAt`,
+          updatedAt: new Date(),
         },
       });
 

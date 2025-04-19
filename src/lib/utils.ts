@@ -1,19 +1,25 @@
 import {
-  ContactInfoContentBody,
+  type ContactInfoContentBody,
   FidRequest,
   fromFarcasterTime,
-  HubResult,
-  Message,
-  MessagesResponse,
-  OnChainEventResponse,
+  type HubResult,
+  type Message,
+  type MessagesResponse,
+  type OnChainEventResponse,
 } from "@farcaster/hub-nodejs";
-import { Insertable } from "kysely";
 
-import { Buffer } from "node:buffer";
+
 import { getAllRegistrationsByFid } from "../api/fid.ts";
 import { getAllSignersByFid } from "../api/signer.ts";
 import { getAllStorageByFid } from "../api/storage.ts";
-import { Tables } from "../db/db.types.ts";
+import type {
+  CastInsert,
+  HubInsert,
+  LinkInsert,
+  ReactionInsert,
+  UserDataInsert,
+  VerificationInsert,
+} from "../db/schema.ts";
 import { hubClient } from "./hub_client.ts";
 import { log } from "./logger.ts";
 import {
@@ -34,7 +40,7 @@ export function farcasterTimeToDate(time: number): Date {
   return new Date(result.value);
 }
 
-export function formatCasts(msgs: Message[]) {
+export function formatCasts(msgs: Message[]): CastInsert[] {
   return msgs.map((msg) => {
     const data = msg.data!;
     const castAddBody = data.castAddBody!;
@@ -50,11 +56,11 @@ export function formatCasts(msgs: Message[]) {
       embeds: JSON.stringify(castAddBody.embeds),
       mentions: JSON.stringify(castAddBody.mentions),
       mentionsPositions: JSON.stringify(castAddBody.mentionsPositions),
-    } satisfies Insertable<Tables["casts"]>;
+    };
   });
 }
 
-export function formatReactions(msgs: Message[]) {
+export function formatReactions(msgs: Message[]): ReactionInsert[] {
   return msgs.map((msg) => {
     const data = msg.data!;
     const reaction = data.reactionBody!;
@@ -67,11 +73,11 @@ export function formatReactions(msgs: Message[]) {
       hash: msg.hash,
       targetCastHash: reaction.targetCastId?.hash,
       targetUrl: reaction.targetUrl,
-    } satisfies Insertable<Tables["reactions"]>;
+    };
   });
 }
 
-export function formatUserDatas(msgs: Message[]) {
+export function formatUserDatas(msgs: Message[]): UserDataInsert[] {
   // Users can submit multiple messages with the same `userDataAddBody.type` within the batch period
   // We reconcile this by using the value of the last message with the same type from that fid
   const userDataMap = new Map<string, Message>();
@@ -92,11 +98,11 @@ export function formatUserDatas(msgs: Message[]) {
       type: userDataAddBody.type,
       hash: msg.hash,
       value: userDataAddBody.value,
-    } satisfies Insertable<Tables["userData"]>;
+    };
   });
 }
 
-export function formatVerifications(msgs: Message[]) {
+export function formatVerifications(msgs: Message[]): VerificationInsert[] {
   return msgs.map((msg) => {
     const data = msg.data!;
     const addAddressBody = data.verificationAddAddressBody!;
@@ -108,11 +114,11 @@ export function formatVerifications(msgs: Message[]) {
       signerAddress: addAddressBody.address,
       blockHash: addAddressBody.blockHash,
       signature: addAddressBody.claimSignature,
-    } satisfies Insertable<Tables["verifications"]>;
+    };
   });
 }
 
-export function formatLinks(msgs: Message[]) {
+export function formatLinks(msgs: Message[]): LinkInsert[] {
   return msgs.map((msg) => {
     const data = msg.data!;
     const link = data.linkBody!;
@@ -126,23 +132,22 @@ export function formatLinks(msgs: Message[]) {
         : null,
       type: link.type,
       hash: msg.hash,
-    } satisfies Insertable<Tables["links"]>;
+    };
   });
 }
 
-export function formatHubs(contacts: ContactInfoContentBody[]) {
+export function formatHubs(contacts: ContactInfoContentBody[]): HubInsert[] {
   return contacts.map(
-    (c) =>
-      ({
-        gossipAddress: JSON.stringify(c.gossipAddress),
-        rpcAddress: JSON.stringify(c.rpcAddress),
-        excludedHashes: c.excludedHashes,
-        count: c.count,
-        hubVersion: c.hubVersion,
-        network: c.network.toString(),
-        appVersion: c.appVersion,
-        timestamp: c.timestamp,
-      }) satisfies Insertable<Tables["hubs"]>,
+    (c) => ({
+      gossipAddress: JSON.stringify(c.gossipAddress),
+      rpcAddress: JSON.stringify(c.rpcAddress),
+      excludedHashes: c.excludedHashes,
+      count: c.count,
+      hubVersion: c.hubVersion,
+      network: c.network.toString(),
+      appVersion: c.appVersion,
+      timestamp: c.timestamp,
+    }),
   );
 }
 

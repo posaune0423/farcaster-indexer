@@ -1,6 +1,6 @@
 import {
   isStorageRentOnChainEvent,
-  OnChainEvent,
+  type OnChainEvent,
   OnChainEventType,
 } from "@farcaster/hub-nodejs";
 
