@@ -10,6 +10,6 @@ export default defineConfig({
     database: "farcaster",
     user: "admin",
     password: "password",
-    ssl: false
+    ssl: false,
   },
 });

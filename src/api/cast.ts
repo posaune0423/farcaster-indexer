@@ -1,13 +1,9 @@
 import type { Message } from "@farcaster/hub-nodejs";
 import { and, eq } from "drizzle-orm";
 
-import { casts, db } from "../db/index.ts";
-import { log } from "../lib/logger.ts";
-import {
-  breakIntoChunks,
-  farcasterTimeToDate,
-  formatCasts,
-} from "../lib/utils.ts";
+import { casts, db } from "../db";
+import { log } from "../lib/logger";
+import { breakIntoChunks, farcasterTimeToDate, formatCasts } from "../lib/utils";
 
 /**
  * Insert casts in the database
@@ -64,12 +60,7 @@ export async function pruneCasts(msgs: Message[]) {
         await tx
           .update(casts)
           .set({ prunedAt: farcasterTimeToDate(data.timestamp) })
-          .where(
-            and(
-              eq(casts.fid, data.fid),
-              eq(casts.text, data.castAddBody!.text),
-            ),
-          )
+          .where(and(eq(casts.fid, data.fid), eq(casts.text, data.castAddBody!.text)))
           .execute();
       }
     });

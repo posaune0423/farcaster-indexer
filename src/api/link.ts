@@ -1,12 +1,8 @@
 import type { Message } from "@farcaster/hub-nodejs";
 import { and, eq } from "drizzle-orm";
-import { db, links } from "../db/index.ts";
-import { log } from "../lib/logger.ts";
-import {
-  breakIntoChunks,
-  farcasterTimeToDate,
-  formatLinks,
-} from "../lib/utils.ts";
+import { db, links } from "../db";
+import { log } from "../lib/logger";
+import { breakIntoChunks, farcasterTimeToDate, formatLinks } from "../lib/utils";
 
 export async function insertLinks(msgs: Message[]) {
   const linkRows = formatLinks(msgs);
@@ -32,12 +28,7 @@ export async function deleteLinks(msgs: Message[]) {
         await tx
           .update(links)
           .set({ deletedAt: farcasterTimeToDate(data.timestamp) })
-          .where(
-            and(
-              eq(links.fid, data.fid),
-              eq(links.targetFid, data.linkBody!.targetFid!),
-            ),
-          )
+          .where(and(eq(links.fid, data.fid), eq(links.targetFid, data.linkBody!.targetFid!)))
           .execute();
       }
     });
@@ -56,12 +47,7 @@ export async function pruneLinks(msgs: Message[]) {
         await tx
           .update(links)
           .set({ prunedAt: farcasterTimeToDate(data.timestamp) })
-          .where(
-            and(
-              eq(links.fid, data.fid),
-              eq(links.targetFid, data.linkBody!.targetFid!),
-            ),
-          )
+          .where(and(eq(links.fid, data.fid), eq(links.targetFid, data.linkBody!.targetFid!)))
           .execute();
       }
     });

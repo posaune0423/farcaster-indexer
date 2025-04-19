@@ -1,12 +1,8 @@
 import type { Message } from "@farcaster/hub-nodejs";
 import { and, eq, sql } from "drizzle-orm";
-import { db, reactions } from "../db/index.ts";
-import { log } from "../lib/logger.ts";
-import {
-  breakIntoChunks,
-  farcasterTimeToDate,
-  formatReactions,
-} from "../lib/utils.ts";
+import { db, reactions } from "../db";
+import { log } from "../lib/logger";
+import { breakIntoChunks, farcasterTimeToDate, formatReactions } from "../lib/utils";
 
 /**
  * Insert a reaction in the database
@@ -46,21 +42,25 @@ export async function deleteReactions(msgs: Message[]) {
           await tx
             .update(reactions)
             .set({ deletedAt: farcasterTimeToDate(data.timestamp) })
-            .where(and(
-              eq(reactions.fid, data.fid),
-              eq(reactions.type, reaction.type),
-              eq(reactions.targetCastHash, reaction.targetCastId.hash),
-            ))
+            .where(
+              and(
+                eq(reactions.fid, data.fid),
+                eq(reactions.type, reaction.type),
+                eq(reactions.targetCastHash, reaction.targetCastId.hash),
+              ),
+            )
             .execute();
         } else if (reaction.targetUrl) {
           await tx
             .update(reactions)
             .set({ deletedAt: farcasterTimeToDate(data.timestamp) })
-            .where(and(
-              eq(reactions.fid, data.fid),
-              eq(reactions.type, reaction.type),
-              eq(reactions.targetUrl, reaction.targetUrl),
-            ))
+            .where(
+              and(
+                eq(reactions.fid, data.fid),
+                eq(reactions.type, reaction.type),
+                eq(reactions.targetUrl, reaction.targetUrl),
+              ),
+            )
             .execute();
         }
       }
@@ -82,21 +82,25 @@ export async function pruneReactions(msgs: Message[]) {
           await tx
             .update(reactions)
             .set({ prunedAt: farcasterTimeToDate(data.timestamp) })
-            .where(and(
-              eq(reactions.fid, data.fid),
-              eq(reactions.type, reaction.type),
-              eq(reactions.targetCastHash, reaction.targetCastId.hash),
-            ))
+            .where(
+              and(
+                eq(reactions.fid, data.fid),
+                eq(reactions.type, reaction.type),
+                eq(reactions.targetCastHash, reaction.targetCastId.hash),
+              ),
+            )
             .execute();
         } else if (reaction.targetUrl) {
           await tx
             .update(reactions)
             .set({ prunedAt: farcasterTimeToDate(data.timestamp) })
-            .where(and(
-              eq(reactions.fid, data.fid),
-              eq(reactions.type, reaction.type),
-              eq(reactions.targetUrl, reaction.targetUrl),
-            ))
+            .where(
+              and(
+                eq(reactions.fid, data.fid),
+                eq(reactions.type, reaction.type),
+                eq(reactions.targetUrl, reaction.targetUrl),
+              ),
+            )
             .execute();
         }
       }

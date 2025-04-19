@@ -1,10 +1,10 @@
 import { HubEvent, HubEventType } from "@farcaster/hub-nodejs";
 import { Buffer } from "node:buffer";
-import { saveLatestEventId } from "../api/event.ts";
-import { createQueue, createWorker } from "./bullmq.ts";
-import { handleEvent } from "./event.ts";
-import { hubClient } from "./hub_client.ts";
-import { log } from "./logger.ts";
+import { saveLatestEventId } from "../api/event";
+import { createQueue, createWorker } from "./bullmq";
+import { handleEvent } from "./event";
+import { hubClient } from "./hub_client";
+import { log } from "./logger";
 
 export const streamQueue = createQueue<Buffer>("stream");
 createWorker<Buffer>("stream", handleEvent, { concurrency: 1 });
@@ -30,11 +30,7 @@ export async function subscribe(fromEventId: number | undefined) {
 
   result.match(
     (stream) => {
-      log.info(
-        `Subscribed to stream from ${
-          fromEventId ? `event ${fromEventId}` : "head"
-        }`,
-      );
+      log.info(`Subscribed to stream from ${fromEventId ? `event ${fromEventId}` : "head"}`);
 
       stream.on("data", async (e: HubEvent) => {
         const encodedEvent = Buffer.from(HubEvent.encode(e).finish());

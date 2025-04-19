@@ -8,9 +8,8 @@ import type {
   OnChainEventType,
 } from "@farcaster/hub-nodejs";
 
-
-import { hubClient } from "./hub_client.ts";
-import { checkMessages, MAX_PAGE_SIZE } from "./utils.ts";
+import { hubClient } from "./hub_client";
+import { checkMessages, MAX_PAGE_SIZE } from "./utils";
 
 export async function getAllCastsByFid(fid: FidRequest) {
   const casts: Message[] = [];
@@ -99,15 +98,10 @@ export async function* getOnChainEventsByFidInBatchesOf(
   },
 ) {
   for (const eventType of eventTypes) {
-    let result = await retryHubCallWithExponentialBackoff(() =>
-      hub.getOnChainEvents({ pageSize, fid, eventType })
-    );
+    let result = await retryHubCallWithExponentialBackoff(() => hub.getOnChainEvents({ pageSize, fid, eventType }));
     for (;;) {
       if (result.isErr()) {
-        throw new Error(
-          `Unable to backfill events for FID ${fid} of type ${eventType}`,
-          { cause: result.error },
-        );
+        throw new Error(`Unable to backfill events for FID ${fid} of type ${eventType}`, { cause: result.error });
       }
 
       const { events, nextPageToken: pageToken } = result.value;
@@ -115,7 +109,7 @@ export async function* getOnChainEventsByFidInBatchesOf(
 
       if (!pageToken?.length) break;
       result = await retryHubCallWithExponentialBackoff(() =>
-        hub.getOnChainEvents({ pageSize, pageToken, fid, eventType })
+        hub.getOnChainEvents({ pageSize, pageToken, fid, eventType }),
       );
     }
   }
@@ -131,9 +125,7 @@ async function retryHubCallWithExponentialBackoff<T>(
   try {
     const result = await fn();
     if (result.isErr()) {
-      throw new Error(
-        `maybe retryable error : ${JSON.stringify(result.error)}`,
-      );
+      throw new Error(`maybe retryable error : ${JSON.stringify(result.error)}`);
     }
     return result;
   } catch (error) {
@@ -146,11 +138,6 @@ async function retryHubCallWithExponentialBackoff<T>(
     await new Promise((resolve) => setTimeout(resolve, delayMs));
 
     currentAttempt++;
-    return retryHubCallWithExponentialBackoff(
-      fn,
-      currentAttempt,
-      maxAttempts,
-      delayMs,
-    );
+    return retryHubCallWithExponentialBackoff(fn, currentAttempt, maxAttempts, delayMs);
   }
 }

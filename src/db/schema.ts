@@ -1,14 +1,4 @@
-import {
-  bigint,
-  customType,
-  integer,
-  json,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  unique,
-} from "drizzle-orm/pg-core";
+import { bigint, customType, integer, json, pgTable, text, timestamp, uuid, unique } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Uint8Array }>({
   dataType() {
@@ -18,10 +8,8 @@ const bytea = customType<{ data: Uint8Array }>({
 
 export const casts = pgTable("casts", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   prunedAt: timestamp("pruned_at", { withTimezone: true }),
@@ -43,10 +31,8 @@ export type CastInsert = typeof casts.$inferInsert;
 
 export const reactions = pgTable("reactions", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   prunedAt: timestamp("pruned_at", { withTimezone: true }),
@@ -63,10 +49,8 @@ export type ReactionInsert = typeof reactions.$inferInsert;
 
 export const links = pgTable("links", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   prunedAt: timestamp("pruned_at", { withTimezone: true }),
@@ -82,10 +66,8 @@ export type LinkInsert = typeof links.$inferInsert;
 
 export const verifications = pgTable("verifications", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   fid: bigint("fid", { mode: "number" }).notNull(),
@@ -98,31 +80,29 @@ export const verifications = pgTable("verifications", {
 export type Verification = typeof verifications.$inferSelect;
 export type VerificationInsert = typeof verifications.$inferInsert;
 
-export const userData = pgTable("userData", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("createdAt", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
-  deletedAt: timestamp("deleted_at", { withTimezone: true }),
-  fid: bigint("fid", { mode: "number" }).notNull(),
-  type: integer("type").notNull(),
-  hash: bytea("hash").notNull().unique(),
-  value: text("value").notNull(),
-}, (table) => ({
-  fidTypeUnique: unique().on(table.fid, table.type),
-}));
+export const userData = pgTable(
+  "userData",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    createdAt: timestamp("createdAt", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    fid: bigint("fid", { mode: "number" }).notNull(),
+    type: integer("type").notNull(),
+    hash: bytea("hash").notNull().unique(),
+    value: text("value").notNull(),
+  },
+  (table) => [unique().on(table.fid, table.type)],
+);
 
 export type UserData = typeof userData.$inferSelect;
 export type UserDataInsert = typeof userData.$inferInsert;
 
 export const fids = pgTable("fids", {
   fid: bigint("fid", { mode: "number" }).primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   registeredAt: timestamp("registered_at", { withTimezone: true }).notNull(),
   custodyAddress: bytea("custody_address").notNull(),
   recoveryAddress: bytea("recovery_address").notNull(),
@@ -131,33 +111,33 @@ export const fids = pgTable("fids", {
 export type Fid = typeof fids.$inferSelect;
 export type FidInsert = typeof fids.$inferInsert;
 
-export const signers = pgTable("signers", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  addedAt: timestamp("added_at", { withTimezone: true }).notNull(),
-  removedAt: timestamp("removed_at", { withTimezone: true }),
-  fid: bigint("fid", { mode: "number" }).notNull(),
-  requesterFid: bigint("requester_fid", { mode: "number" }).notNull(),
-  key: bytea("key").notNull(),
-  keyType: integer("key_type").notNull(),
-  metadata: json("metadata").notNull(),
-  metadataType: integer("metadata_type").notNull(),
-}, (table) => ({
-  fidKeyUnique: unique().on(table.fid, table.key),
-}));
+export const signers = pgTable(
+  "signers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    addedAt: timestamp("added_at", { withTimezone: true }).notNull(),
+    removedAt: timestamp("removed_at", { withTimezone: true }),
+    fid: bigint("fid", { mode: "number" }).notNull(),
+    requesterFid: bigint("requester_fid", { mode: "number" }).notNull(),
+    key: bytea("key").notNull(),
+    keyType: integer("key_type").notNull(),
+    metadata: json("metadata").notNull(),
+    metadataType: integer("metadata_type").notNull(),
+  },
+  (table) => ({
+    fidKeyUnique: unique().on(table.fid, table.key),
+  }),
+);
 
 export type Signer = typeof signers.$inferSelect;
 export type SignerInsert = typeof signers.$inferInsert;
 
 export const storage = pgTable("storage", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   rentedAt: timestamp("rented_at", { withTimezone: true }).notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   fid: bigint("fid", { mode: "number" }).notNull(),
@@ -170,10 +150,8 @@ export type StorageInsert = typeof storage.$inferInsert;
 
 export const hubs = pgTable("hubs", {
   id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   gossipAddress: text("gossip_address").notNull(),
   rpcAddress: text("rpc_address").notNull(),
   excludedHashes: json("excluded_hashes").notNull().default([]),

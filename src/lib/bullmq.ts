@@ -1,5 +1,5 @@
 import { type Job, Queue, type QueueOptions, Worker } from "bullmq";
-import { redis } from "./redis.ts";
+import { redis } from "./redis";
 
 const bullMqOptions: QueueOptions = {
   connection: redis.options,
@@ -17,8 +17,7 @@ export function createWorker<T>(
     concurrency?: number;
   },
 ) {
-  const concurrency = opts?.concurrency ||
-    Number(process.env.WORKER_CONCURRENCY || 5);
+  const concurrency = opts?.concurrency || Number(process.env.WORKER_CONCURRENCY || 5);
 
   return new Worker<T>(name, jobHandler, {
     ...bullMqOptions,

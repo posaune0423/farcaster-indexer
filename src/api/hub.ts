@@ -1,8 +1,8 @@
 import type { ContactInfoContentBody } from "@farcaster/hub-nodejs";
 
-import { db, hubs as hubsTable } from "../db/index.ts";
-import { log } from "../lib/logger.ts";
-import { breakIntoChunks, formatHubs } from "../lib/utils.ts";
+import { db, hubs as hubsTable } from "../db";
+import { log } from "../lib/logger";
+import { breakIntoChunks, formatHubs } from "../lib/utils";
 
 /**
  * Insert hubs in the database

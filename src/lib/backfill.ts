@@ -1,19 +1,19 @@
 import type { Job } from "bullmq";
 
-import { insertCasts } from "../api/cast.ts";
-import { saveLatestEventId } from "../api/event.ts";
-import { insertRegistrations } from "../api/fid.ts";
-import { insertLinks } from "../api/link.ts";
-import { insertReactions } from "../api/reaction.ts";
-import { insertSigners } from "../api/signer.ts";
-import { insertStorage } from "../api/storage.ts";
-import { insertUserDatas } from "../api/user_data.ts";
-import { insertVerifications } from "../api/verification.ts";
-import { createQueue, createWorker } from "../lib/bullmq.ts";
-import { log } from "../lib/logger.ts";
-import { getFullProfileFromHub } from "../lib/utils.ts";
-import { makeLatestEventId } from "./event.ts";
-import { hubClient } from "./hub_client.ts";
+import { insertCasts } from "../api/cast";
+import { saveLatestEventId } from "../api/event";
+import { insertRegistrations } from "../api/fid";
+import { insertLinks } from "../api/link";
+import { insertReactions } from "../api/reaction";
+import { insertSigners } from "../api/signer";
+import { insertStorage } from "../api/storage";
+import { insertUserDatas } from "../api/user_data";
+import { insertVerifications } from "../api/verification";
+import { createQueue, createWorker } from "../lib/bullmq";
+import { log } from "../lib/logger";
+import { getFullProfileFromHub } from "../lib/utils";
+import { makeLatestEventId } from "./event";
+import { hubClient } from "./hub_client";
 
 type BackfillJob = {
   fids: number[];
@@ -50,7 +50,7 @@ export async function backfill({ maxFid }: { maxFid?: number | undefined }) {
   const latestEventId = makeLatestEventId();
   await saveLatestEventId(latestEventId);
   await addFidsToBackfillQueue(maxFid);
-  await getDbInfo()
+  await getDbInfo();
   // await getHubs();
 }
 
@@ -88,13 +88,13 @@ async function getAllFids() {
 async function getDbInfo() {
   const dbInfo = await hubClient.getInfo({
     dbStats: true,
-  })
+  });
 
   if (dbInfo.isErr()) {
-    throw new Error('Unable to get DB info', { cause: dbInfo.error })
+    throw new Error("Unable to get DB info", { cause: dbInfo.error });
   }
 
-log.info(dbInfo.value)
+  log.info(dbInfo.value);
 }
 
 async function handleJob(job: Job) {

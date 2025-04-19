@@ -1,4 +1,4 @@
-import { redis } from "../lib/redis.ts";
+import { redis } from "../lib/redis";
 
 const redisKey = "hub:latest-event-id";
 

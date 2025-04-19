@@ -3,12 +3,11 @@ import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { HonoAdapter } from "@bull-board/hono";
 import { extractEventTimestamp } from "@farcaster/hub-nodejs";
 import { type Context, Hono } from "hono";
-import { getLatestEvent } from "../api/event.ts";
-import { backfillQueue } from "./backfill.ts";
-import { log } from "./logger.ts";
-import { serve } from "@hono/node-server";
+import { getLatestEvent } from "../api/event";
+import { backfillQueue } from "./backfill";
+import { log } from "./logger";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { streamQueue } from "./subscriber.ts";
+import { streamQueue } from "./subscriber";
 
 export function initHonoApp() {
   const app = new Hono();
@@ -37,13 +36,16 @@ export function initHonoApp() {
     return c.json({ latestEventId, latestEventTimestamp, isBackfillActive });
   });
 
-
-  // Deno.serve で起動
-  serve({ fetch: app.fetch, port: 3000 }, ({ address, port }) => {
-    log.info(`Running on ${address}:${port}...`);
-    log.info(`For the UI of instance1, open http://localhost:${port}/ui`);
-    log.info("Make sure Redis is running on port 6379 by default");
-    log.info("To populate the queue, run:");
-    log.info(`  curl http://localhost:${port}/add?title=Example`);
+  const server = Bun.serve({
+    fetch: app.fetch,
+    port: 3000,
+    hostname: "localhost",
+    development: process.env.NODE_ENV !== "production",
   });
+
+  log.info(`Running on ${server.hostname}:${server.port}...`);
+  log.info(`For the UI of instance1, open http://localhost:${server.port}/ui`);
+  log.info("Make sure Redis is running on port 6379 by default");
+  log.info("To populate the queue, run:");
+  log.info(`  curl http://localhost:${server.port}/add?title=Example`);
 }

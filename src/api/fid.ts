@@ -6,28 +6,25 @@ import {
 } from "@farcaster/hub-nodejs";
 
 import { eq, sql } from "drizzle-orm";
-import { db, fids as fidsTable } from "../db/index.ts";
-import { hubClient } from "../lib/hub_client.ts";
-import { getOnChainEventsByFidInBatchesOf } from "../lib/paginate.ts";
-import { MAX_PAGE_SIZE, NULL_ETH_ADDRESS } from "../lib/utils.ts";
+import { db, fids as fidsTable } from "../db";
+import { hubClient } from "../lib/hub_client";
+import { getOnChainEventsByFidInBatchesOf } from "../lib/paginate";
+import { MAX_PAGE_SIZE, NULL_ETH_ADDRESS } from "../lib/utils";
+
 export async function getAllRegistrationsByFid(fid: number) {
   let registrationEvents: OnChainEvent[] = [];
 
-  for await (
-    const events of getOnChainEventsByFidInBatchesOf(hubClient, {
-      fid,
-      pageSize: MAX_PAGE_SIZE,
-      eventTypes: [OnChainEventType.EVENT_TYPE_ID_REGISTER],
-    })
-  ) {
+  for await (const events of getOnChainEventsByFidInBatchesOf(hubClient, {
+    fid,
+    pageSize: MAX_PAGE_SIZE,
+    eventTypes: [OnChainEventType.EVENT_TYPE_ID_REGISTER],
+  })) {
     registrationEvents = registrationEvents.concat(...events);
   }
 
   // Since there could be many events, ensure we process them in sorted order
   const sortedEventsForFid = registrationEvents.sort((a, b) =>
-    a.blockNumber === b.blockNumber
-      ? a.logIndex - b.logIndex
-      : a.blockNumber - b.blockNumber
+    a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : a.blockNumber - b.blockNumber,
   );
 
   return sortedEventsForFid;
@@ -41,9 +38,7 @@ export async function insertRegistrations(registrationEvents: OnChainEvent[]) {
 
     const body = registration.idRegisterEventBody;
     const custodyAddress = body.to.length ? body.to : NULL_ETH_ADDRESS;
-    const recoveryAddress = body.recoveryAddress.length
-      ? body.recoveryAddress
-      : NULL_ETH_ADDRESS;
+    const recoveryAddress = body.recoveryAddress.length ? body.recoveryAddress : NULL_ETH_ADDRESS;
 
     switch (body.eventType) {
       case IdRegisterEventType.REGISTER: {

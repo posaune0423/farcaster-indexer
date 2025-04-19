@@ -1,29 +1,16 @@
-import {
-  FARCASTER_EPOCH,
-  HubEvent,
-  HubEventType,
-  MessageType,
-  OnChainEventType,
-} from "@farcaster/hub-nodejs";
+import { FARCASTER_EPOCH, HubEvent, HubEventType, MessageType, OnChainEventType } from "@farcaster/hub-nodejs";
 import type { Job } from "bullmq";
 
 import { Buffer } from "node:buffer";
-import { deleteCasts, insertCasts, pruneCasts } from "../api/cast.ts";
-import { insertRegistrations } from "../api/fid.ts";
-import { deleteLinks, insertLinks, pruneLinks } from "../api/link.ts";
-import {
-  deleteReactions,
-  insertReactions,
-  pruneReactions,
-} from "../api/reaction.ts";
-import { insertSigners } from "../api/signer.ts";
-import { insertStorage } from "../api/storage.ts";
-import { insertUserDatas } from "../api/user_data.ts";
-import {
-  deleteVerifications,
-  insertVerifications,
-} from "../api/verification.ts";
-import { log } from "./logger.ts";
+import { deleteCasts, insertCasts, pruneCasts } from "../api/cast";
+import { insertRegistrations } from "../api/fid";
+import { deleteLinks, insertLinks, pruneLinks } from "../api/link";
+import { deleteReactions, insertReactions, pruneReactions } from "../api/reaction";
+import { insertSigners } from "../api/signer";
+import { insertStorage } from "../api/storage";
+import { insertUserDatas } from "../api/user_data";
+import { deleteVerifications, insertVerifications } from "../api/verification";
+import { log } from "./logger";
 
 /**
  * Update the database based on the event type

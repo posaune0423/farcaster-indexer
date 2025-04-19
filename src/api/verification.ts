@@ -1,9 +1,9 @@
 import type { Message } from "@farcaster/hub-nodejs";
-
 import { and, eq, sql } from "drizzle-orm";
-import { db, verifications as verificationsTable } from "../db/index.ts";
-import { log } from "../lib/logger.ts";
-import { farcasterTimeToDate, formatVerifications } from "../lib/utils.ts";
+import { db, verifications as verificationsTable } from "../db";
+import { log } from "../lib/logger";
+import { farcasterTimeToDate, formatVerifications } from "../lib/utils";
+
 /**
  * Insert a new verification in the database
  * @param msg Hub event in JSON format
@@ -45,12 +45,7 @@ export async function deleteVerifications(msgs: Message[]) {
         await trx
           .update(verificationsTable)
           .set({ deletedAt: farcasterTimeToDate(data.timestamp) })
-          .where(
-            and(
-              eq(verificationsTable.signerAddress, address),
-              eq(verificationsTable.fid, data.fid),
-            ),
-          )
+          .where(and(eq(verificationsTable.signerAddress, address), eq(verificationsTable.fid, data.fid)))
           .execute();
       }
     });

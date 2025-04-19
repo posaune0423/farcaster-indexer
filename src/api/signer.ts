@@ -1,16 +1,11 @@
-import {
-  isSignerOnChainEvent,
-  type OnChainEvent,
-  OnChainEventType,
-  SignerEventType,
-} from "@farcaster/hub-nodejs";
+import { isSignerOnChainEvent, type OnChainEvent, OnChainEventType, SignerEventType } from "@farcaster/hub-nodejs";
 import { bytesToHex, decodeAbiParameters } from "viem";
 
 import { and, eq, sql } from "drizzle-orm";
-import { db, signers as signersTable } from "../db/index.ts";
-import { hubClient } from "../lib/hub_client.ts";
-import { getOnChainEventsByFidInBatchesOf } from "../lib/paginate.ts";
-import { MAX_PAGE_SIZE } from "../lib/utils.ts";
+import { db, signers as signersTable } from "../db";
+import { hubClient } from "../lib/hub_client";
+import { getOnChainEventsByFidInBatchesOf } from "../lib/paginate";
+import { MAX_PAGE_SIZE } from "../lib/utils";
 
 const signedKeyRequestAbi = [
   {
@@ -44,21 +39,17 @@ export function decodeSignedKeyRequestMetadata(metadata: Uint8Array) {
 export async function getAllSignersByFid(fid: number) {
   let signerEvents: OnChainEvent[] = [];
 
-  for await (
-    const events of getOnChainEventsByFidInBatchesOf(hubClient, {
-      fid,
-      pageSize: MAX_PAGE_SIZE,
-      eventTypes: [OnChainEventType.EVENT_TYPE_SIGNER],
-    })
-  ) {
+  for await (const events of getOnChainEventsByFidInBatchesOf(hubClient, {
+    fid,
+    pageSize: MAX_PAGE_SIZE,
+    eventTypes: [OnChainEventType.EVENT_TYPE_SIGNER],
+  })) {
     signerEvents = signerEvents.concat(...events);
   }
 
   // Since there could be many events, ensure we process them in sorted order
   const sortedEventsForFid = signerEvents.sort((a, b) =>
-    a.blockNumber === b.blockNumber
-      ? a.logIndex - b.logIndex
-      : a.blockNumber - b.blockNumber
+    a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : a.blockNumber - b.blockNumber,
   );
 
   return sortedEventsForFid;
@@ -75,9 +66,7 @@ export async function insertSigners(signers: OnChainEvent[]) {
 
     switch (body.eventType) {
       case SignerEventType.ADD: {
-        const signedKeyRequestMetadata = decodeSignedKeyRequestMetadata(
-          body.metadata,
-        );
+        const signedKeyRequestMetadata = decodeSignedKeyRequestMetadata(body.metadata);
         const metadataJson = {
           requestFid: Number(signedKeyRequestMetadata.requestFid),
           requestSigner: signedKeyRequestMetadata.requestSigner,
@@ -118,12 +107,7 @@ export async function insertSigners(signers: OnChainEvent[]) {
             removedAt: timestamp,
             updatedAt: new Date(),
           })
-          .where(
-            and(
-              eq(signersTable.fid, signer.fid),
-              eq(signersTable.key, body.key),
-            ),
-          )
+          .where(and(eq(signersTable.fid, signer.fid), eq(signersTable.key, body.key)))
           .execute();
 
         break;

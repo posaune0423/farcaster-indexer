@@ -124,9 +124,7 @@
         "casts_hash_unique": {
           "name": "casts_hash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "hash"
-          ]
+          "columns": ["hash"]
         }
       },
       "policies": {},
@@ -348,9 +346,7 @@
         "links_hash_unique": {
           "name": "links_hash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "hash"
-          ]
+          "columns": ["hash"]
         }
       },
       "policies": {},
@@ -444,9 +440,7 @@
         "reactions_hash_unique": {
           "name": "reactions_hash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "hash"
-          ]
+          "columns": ["hash"]
         }
       },
       "policies": {},
@@ -668,17 +662,12 @@
         "userData_hash_unique": {
           "name": "userData_hash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "hash"
-          ]
+          "columns": ["hash"]
         },
         "userData_fid_type_unique": {
           "name": "userData_fid_type_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "fid",
-            "type"
-          ]
+          "columns": ["fid", "type"]
         }
       },
       "policies": {},
@@ -760,9 +749,7 @@
         "verifications_hash_unique": {
           "name": "verifications_hash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "hash"
-          ]
+          "columns": ["hash"]
         }
       },
       "policies": {},

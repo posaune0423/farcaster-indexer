@@ -5,12 +5,11 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "moduleResolution": "node",
-    "emitDeclarationOnly": true,
-    "allowImportingTsExtensions": true,
     "declaration": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "noEmit": false
   },
   "include": ["./src/**/*.ts"]
 }

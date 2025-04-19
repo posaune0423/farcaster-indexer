@@ -8,10 +8,9 @@ import {
   type OnChainEventResponse,
 } from "@farcaster/hub-nodejs";
 
-
-import { getAllRegistrationsByFid } from "../api/fid.ts";
-import { getAllSignersByFid } from "../api/signer.ts";
-import { getAllStorageByFid } from "../api/storage.ts";
+import { getAllRegistrationsByFid } from "../api/fid";
+import { getAllSignersByFid } from "../api/signer";
+import { getAllStorageByFid } from "../api/storage";
 import type {
   CastInsert,
   HubInsert,
@@ -19,20 +18,14 @@ import type {
   ReactionInsert,
   UserDataInsert,
   VerificationInsert,
-} from "../db/schema.ts";
-import { hubClient } from "./hub_client.ts";
-import { log } from "./logger.ts";
-import {
-  getAllCastsByFid,
-  getAllLinksByFid,
-  getAllReactionsByFid,
-} from "./paginate.ts";
+} from "../db/schema";
+import { hubClient } from "./hub_client";
+import { log } from "./logger";
+import { getAllCastsByFid, getAllLinksByFid, getAllReactionsByFid } from "./paginate";
 
 export const MAX_PAGE_SIZE = 10_000;
 
-export const NULL_ETH_ADDRESS = Uint8Array.from(
-  Buffer.from("0000000000000000000000000000000000000000", "hex"),
-);
+export const NULL_ETH_ADDRESS = Uint8Array.from(Buffer.from("0000000000000000000000000000000000000000", "hex"));
 
 export function farcasterTimeToDate(time: number): Date {
   const result = fromFarcasterTime(time);
@@ -127,9 +120,7 @@ export function formatLinks(msgs: Message[]): LinkInsert[] {
       timestamp: farcasterTimeToDate(data.timestamp),
       fid: data.fid,
       targetFid: link.targetFid,
-      displayTimestamp: link.displayTimestamp
-        ? farcasterTimeToDate(link.displayTimestamp)
-        : null,
+      displayTimestamp: link.displayTimestamp ? farcasterTimeToDate(link.displayTimestamp) : null,
       type: link.type,
       hash: msg.hash,
     };
@@ -137,18 +128,16 @@ export function formatLinks(msgs: Message[]): LinkInsert[] {
 }
 
 export function formatHubs(contacts: ContactInfoContentBody[]): HubInsert[] {
-  return contacts.map(
-    (c) => ({
-      gossipAddress: JSON.stringify(c.gossipAddress),
-      rpcAddress: JSON.stringify(c.rpcAddress),
-      excludedHashes: c.excludedHashes,
-      count: c.count,
-      hubVersion: c.hubVersion,
-      network: c.network.toString(),
-      appVersion: c.appVersion,
-      timestamp: c.timestamp,
-    }),
-  );
+  return contacts.map((c) => ({
+    gossipAddress: JSON.stringify(c.gossipAddress),
+    rpcAddress: JSON.stringify(c.rpcAddress),
+    excludedHashes: c.excludedHashes,
+    count: c.count,
+    hubVersion: c.hubVersion,
+    network: c.network.toString(),
+    appVersion: c.appVersion,
+    timestamp: c.timestamp,
+  }));
 }
 
 export function breakIntoChunks<T>(array: T[], size: number) {
@@ -159,10 +148,7 @@ export function breakIntoChunks<T>(array: T[], size: number) {
   return chunks;
 }
 
-export function checkMessages(
-  messages: HubResult<MessagesResponse>,
-  fid: number,
-) {
+export function checkMessages(messages: HubResult<MessagesResponse>, fid: number) {
   if (messages.isErr()) {
     // This happens consistently for the same fids for an unknown reason, but still saves their relevant data
     log.debug(messages.error, `Error fetching messages for FID ${fid}`);
@@ -171,10 +157,7 @@ export function checkMessages(
   return messages.isOk() ? messages.value.messages : [];
 }
 
-export function checkOnchainEvent(
-  event: HubResult<OnChainEventResponse>,
-  fid: number,
-) {
+export function checkOnchainEvent(event: HubResult<OnChainEventResponse>, fid: number) {
   if (event.isErr()) {
     log.warn(event.error, `Error fetching onchain event for FID ${fid}`);
   }

@@ -5,15 +5,18 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "dotenvx run -- tsx src/index.ts",
-    "db:generate": "dotenvx run -- drizzle-kit generate",
-    "db:migrate": "dotenvx run -- drizzle-kit migrate",
-    "db:studio": "dotenvx run -- drizzle-kit studio"
+    "build": "tsc",
+    "start": "bun run dist/server.js",
+    "dev": "bun run src/server.ts",
+    "db:generate": "bun run drizzle-kit generate",
+    "db:migrate": "bun run drizzle-kit migrate",
+    "db:studio": "bun run drizzle-kit studio",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.8.1",
+  "packageManager": "bun@1.2.10",
   "prettier": {
     "singleQuote": false,
     "trailingComma": "all",
@@ -37,8 +40,10 @@
     "viem": "^2.27.2"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.10",
     "@types/pg": "^8.11.13",
     "drizzle-kit": "^0.31.0",
-    "pg-connection-string": "^2.7.0"
+    "pg-connection-string": "^2.7.0",
+    "prettier": "^3.5.3"
   }
 }
