@@ -1,6 +1,6 @@
 {
-  "id": "dae8900f-958e-4549-b1ae-29cee79a5db4",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "d42250ed-e285-4d3f-bb3a-2c75b0750670",
+  "prevId": "dae8900f-958e-4549-b1ae-29cee79a5db4",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -530,7 +530,16 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "signers_fid_key_unique": {
+          "name": "signers_fid_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "fid",
+            "key"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

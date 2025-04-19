@@ -100,11 +100,11 @@ export async function insertSigners(signers: OnChainEvent[]) {
             target: [signersTable.fid, signersTable.key],
             set: {
               // Update all other fields in case this was a replayed transaction from a block re-org
-              addedAt: sql`excluded.addedAt`,
-              requesterFid: sql`excluded.requesterFid`,
-              keyType: sql`excluded.keyType`,
+              addedAt: sql`excluded.added_at`,
+              requesterFid: sql`excluded.requester_fid`,
+              keyType: sql`excluded.key_type`,
               metadata: JSON.stringify(metadataJson),
-              metadataType: sql`excluded.metadataType`,
+              metadataType: sql`excluded.metadata_type`,
               updatedAt: new Date(),
             },
           });

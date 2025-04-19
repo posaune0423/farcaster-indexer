@@ -58,9 +58,9 @@ export async function insertRegistrations(registrationEvents: OnChainEvent[]) {
           .onConflictDoUpdate({
             target: [fidsTable.fid],
             set: {
-              registeredAt: sql`excluded.registeredAt`,
-              custodyAddress: sql`excluded.custodyAddress`,
-              recoveryAddress: sql`excluded.recoveryAddress`,
+              registeredAt: sql`excluded.registered_at`,
+              custodyAddress: sql`excluded.custody_address`,
+              recoveryAddress: sql`excluded.recovery_address`,
               updatedAt: new Date(),
             },
           });

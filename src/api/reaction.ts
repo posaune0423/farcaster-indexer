@@ -25,7 +25,7 @@ export async function insertReactions(msgs: Message[]) {
         .onConflictDoUpdate({
           target: [reactions.hash],
           set: {
-            updatedAt: sql`CURRENT_TIMESTAMP`,
+            updatedAt: new Date(),
           },
         });
       log.debug(`REACTIONS INSERTED`);

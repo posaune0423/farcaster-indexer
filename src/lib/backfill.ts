@@ -50,8 +50,8 @@ export async function backfill({ maxFid }: { maxFid?: number | undefined }) {
   const latestEventId = makeLatestEventId();
   await saveLatestEventId(latestEventId);
   await addFidsToBackfillQueue(maxFid);
+  await getDbInfo()
   // await getHubs();
-  // await getDbInfo()
 }
 
 /**
@@ -85,17 +85,17 @@ async function getAllFids() {
 //   insertHubs(peers.value.contacts);
 // }
 
-// async function getDbInfo() {
-//   const dbInfo = await hubClient.getInfo({
-//     dbStats: true,
-//   })
+async function getDbInfo() {
+  const dbInfo = await hubClient.getInfo({
+    dbStats: true,
+  })
 
-//   if (dbInfo.isErr()) {
-//     throw new Error('Unable to get DB info', { cause: dbInfo.error })
-//   }
+  if (dbInfo.isErr()) {
+    throw new Error('Unable to get DB info', { cause: dbInfo.error })
+  }
 
-// log.info(dbInfo.value)
-// }
+log.info(dbInfo.value)
+}
 
 async function handleJob(job: Job) {
   const { fids } = job.data;

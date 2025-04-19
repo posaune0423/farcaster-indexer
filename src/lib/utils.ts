@@ -77,7 +77,7 @@ export function formatReactions(msgs: Message[]): ReactionInsert[] {
   });
 }
 
-export function formatUserDatas(msgs: Message[]): UserDataInsert[] {
+export function formatUserData(msgs: Message[]): UserDataInsert[] {
   // Users can submit multiple messages with the same `userDataAddBody.type` within the batch period
   // We reconcile this by using the value of the last message with the same type from that fid
   const userDataMap = new Map<string, Message>();

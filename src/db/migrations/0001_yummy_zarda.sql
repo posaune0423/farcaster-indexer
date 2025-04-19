@@ -1,0 +1,1 @@
+ALTER TABLE "signers" ADD CONSTRAINT "signers_fid_key_unique" UNIQUE("fid","key");

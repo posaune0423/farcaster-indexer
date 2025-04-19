@@ -19,7 +19,7 @@ export async function insertVerifications(msgs: Message[]) {
       .onConflictDoUpdate({
         target: [verificationsTable.hash],
         set: {
-          deletedAt: sql`excluded.deletedAt`,
+          deletedAt: sql`excluded.deleted_at`,
           updatedAt: new Date(),
         },
       });

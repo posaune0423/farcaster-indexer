@@ -55,8 +55,8 @@ export async function insertStorage(storageEvents: OnChainEvent[]) {
         set: {
           units: sql`excluded.units`,
           payer: sql`excluded.payer`,
-          expiresAt: sql`excluded.expiresAt`,
-          rentedAt: sql`excluded.rentedAt`,
+          expiresAt: sql`excluded.expires_at`,
+          rentedAt: sql`excluded.rented_at`,
           updatedAt: new Date(),
         },
       });
