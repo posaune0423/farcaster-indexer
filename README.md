@@ -4,28 +4,28 @@ This is an indexer that listens for messages from a
 [Farcaster Hub](https://docs.farcaster.xyz/learn/architecture/hubs) and inserts
 relevant data into a postgres database.
 
-## Tech Stack / 技術スタック
+## Tech Stack
 
-- **Deno**: Runtime environment for TypeScript/JavaScript
+- **Bun**: Runtime environment for TypeScript/JavaScript
 - **Drizzle ORM**: Type-safe ORM for PostgreSQL
 - **BullMQ**: Distributed job and queue management (with Redis)
-- **Hono**: Lightweight web framework for Deno
+- **Hono**: Lightweight web framework for Bun
 - **PostgreSQL**: Main database
 - **Redis**: Queue backend for BullMQ
 - **Farcaster Hub**: Source of events/messages
 - **Pino**: Logging
-- **その他**: dotenv, cli-progress, viem など
+- **Others**: dotenv, cli-progress, viem
 
 ---
 
-The most performant way to run this is to co-locate everything (hub, Deno app,
+The most performant way to run this is to co-locate everything (hub, Bun app,
 postgres, redis) on the same machine. I recommend
 [Latitude](https://www.latitude.sh/r/673C7DB2) (referral code for $200 of free
 credits).
 
 ## Prerequisites
 
-- Deno
+- Bun
 - Docker and Docker Compose (for PostgreSQL and Redis)
 
 ## Docker Setup
@@ -35,7 +35,7 @@ credits).
 ```bash
 # Start PostgreSQL
 docker run -d \
-  --name postgres-farcaster \
+  --name farcaster-indexer-postgres \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=farcaster \
@@ -44,7 +44,7 @@ docker run -d \
 
 # Start Redis
 docker run -d \
-  --name redis-farcaster \
+  --name farcaster-indexer-redis \
   -p 6379:6379 \
   redis:7
 ```
@@ -53,8 +53,8 @@ docker run -d \
 
 ```bash
 # Stop and remove containers
-docker stop postgres-farcaster redis-farcaster
-docker rm postgres-farcaster redis-farcaster
+docker stop farcaster-indexer-postgres farcaster-indexer-redis
+docker rm farcaster-indexer-postgres farcaster-indexer-redis
 
 # Restart services (use the same commands as above to start)
 ```
@@ -64,15 +64,14 @@ docker rm postgres-farcaster redis-farcaster
 Clone this repo
 
 ```bash
-git clone -b hubs https://github.com/gskril/farcaster-indexer.git
+git clone https://github.com/posaune0423/farcaster-indexer.git
 cd farcaster-indexer
 ```
 
-Install dependencies (Deno will auto-install on first run, but you can
-pre-cache)
+Install dependencies
 
 ```bash
-deno cache src/index.ts
+bun install
 ```
 
 Create a `.env` file with your hub, database, and redis connection details
@@ -84,7 +83,7 @@ cp .env.example .env
 Run the latest database migrations
 
 ```bash
-deno run --allow-env --allow-net --allow-read ./src/db/migrator.ts
+bun run db:migrate
 ```
 
 Run the indexer
@@ -92,11 +91,11 @@ Run the indexer
 ```bash
 # Recommended to get the full state. You only need to run this once.
 # Streaming will start after the backfill is complete.
-deno run --allow-env --allow-net --allow-read ./src/index.ts --backfill
+bun run start --backfill
 
 # Ignores backfill and starts streaming from the latest recorded event.
 # You should run this after one initial backfill.
-deno run --allow-env --allow-net --allow-read ./src/index.ts
+bun run start
 ```
 
 ## How it works
