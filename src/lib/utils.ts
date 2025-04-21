@@ -25,7 +25,9 @@ import { getAllCastsByFid, getAllLinksByFid, getAllReactionsByFid } from "./pagi
 
 export const MAX_PAGE_SIZE = 10_000;
 
-export const NULL_ETH_ADDRESS = Uint8Array.from(Buffer.from("0000000000000000000000000000000000000000", "hex"));
+export const NULL_ETH_ADDRESS = Uint8Array.from(
+  Buffer.from("0000000000000000000000000000000000000000", "hex"),
+);
 
 export function farcasterTimeToDate(time: number): Date {
   const result = fromFarcasterTime(time);

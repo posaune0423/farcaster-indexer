@@ -1,4 +1,9 @@
-import { isSignerOnChainEvent, type OnChainEvent, OnChainEventType, SignerEventType } from "@farcaster/hub-nodejs";
+import {
+  isSignerOnChainEvent,
+  type OnChainEvent,
+  OnChainEventType,
+  SignerEventType,
+} from "@farcaster/hub-nodejs";
 import { bytesToHex, decodeAbiParameters } from "viem";
 
 import { and, eq, sql } from "drizzle-orm";

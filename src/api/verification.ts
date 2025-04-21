@@ -45,7 +45,12 @@ export async function deleteVerifications(msgs: Message[]) {
         await trx
           .update(verificationsTable)
           .set({ deletedAt: farcasterTimeToDate(data.timestamp) })
-          .where(and(eq(verificationsTable.signerAddress, address), eq(verificationsTable.fid, data.fid)))
+          .where(
+            and(
+              eq(verificationsTable.signerAddress, address),
+              eq(verificationsTable.fid, data.fid),
+            ),
+          )
           .execute();
       }
     });

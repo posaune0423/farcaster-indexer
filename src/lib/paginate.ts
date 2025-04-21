@@ -98,10 +98,14 @@ export async function* getOnChainEventsByFidInBatchesOf(
   },
 ) {
   for (const eventType of eventTypes) {
-    let result = await retryHubCallWithExponentialBackoff(() => hub.getOnChainEvents({ pageSize, fid, eventType }));
+    let result = await retryHubCallWithExponentialBackoff(() =>
+      hub.getOnChainEvents({ pageSize, fid, eventType }),
+    );
     for (;;) {
       if (result.isErr()) {
-        throw new Error(`Unable to backfill events for FID ${fid} of type ${eventType}`, { cause: result.error });
+        throw new Error(`Unable to backfill events for FID ${fid} of type ${eventType}`, {
+          cause: result.error,
+        });
       }
 
       const { events, nextPageToken: pageToken } = result.value;

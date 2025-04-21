@@ -1,4 +1,10 @@
-import { FARCASTER_EPOCH, HubEvent, HubEventType, MessageType, OnChainEventType } from "@farcaster/hub-nodejs";
+import {
+  FARCASTER_EPOCH,
+  HubEvent,
+  HubEventType,
+  MessageType,
+  OnChainEventType,
+} from "@farcaster/hub-nodejs";
 import type { Job } from "bullmq";
 
 import { Buffer } from "node:buffer";

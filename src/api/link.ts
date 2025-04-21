@@ -11,8 +11,12 @@ export async function insertLinks(msgs: Message[]) {
 
   for (const chunk of chunks) {
     try {
-      await db.insert(links).values(chunk);
-      log.debug(`LINKS INSERTED`);
+      const result = await db
+        .insert(links)
+        .values(chunk)
+        .onConflictDoNothing({ target: links.hash });
+
+      log.debug(`LINKS INSERTED: ${result.rowCount}`);
     } catch (error) {
       log.error(error, "ERROR INSERTING LINKS");
       throw error;

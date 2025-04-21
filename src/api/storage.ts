@@ -1,4 +1,8 @@
-import { isStorageRentOnChainEvent, type OnChainEvent, OnChainEventType } from "@farcaster/hub-nodejs";
+import {
+  isStorageRentOnChainEvent,
+  type OnChainEvent,
+  OnChainEventType,
+} from "@farcaster/hub-nodejs";
 import { sql } from "drizzle-orm";
 import { db, storage as storageTable } from "../db";
 import { hubClient } from "../lib/hub_client";
