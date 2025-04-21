@@ -33,30 +33,18 @@ credits).
 ### Start Services
 
 ```bash
-# Start PostgreSQL
-docker run -d \
-  --name farcaster-indexer-postgres \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=farcaster \
-  -p 5432:5432 \
-  postgres:15
-
-# Start Redis
-docker run -d \
-  --name farcaster-indexer-redis \
-  -p 6379:6379 \
-  redis:7
+docker compose up
 ```
 
 ### Cleanup and Restart
 
 ```bash
 # Stop and remove containers
-docker stop farcaster-indexer-postgres farcaster-indexer-redis
+docker compose down
 docker rm farcaster-indexer-postgres farcaster-indexer-redis
 
 # Restart services (use the same commands as above to start)
+docker compose up
 ```
 
 ## How to run
